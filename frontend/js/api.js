@@ -1,5 +1,7 @@
 // Único archivo que habla con el backend. Todo pasa por POST /graphql.
-const API_URL = "http://localhost:8000/graphql";
+const API_URL = ["localhost", "127.0.0.1"].includes(location.hostname)
+  ? "http://localhost:8080/graphql"
+  : "https://pokeapi-production-ecf5.up.railway.app/graphql";
 
 const BAG_FIELDS = `
   fragment BagFields on BagItem {
