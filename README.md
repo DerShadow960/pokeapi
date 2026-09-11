@@ -5,8 +5,8 @@ Python backend with its own GraphQL API, framework-free HTML/CSS/JS frontend, da
 
 > The user interface and user-facing error messages are in Spanish.
 
-- **Frontend:** _PENDING_FRONTEND_URL_
-- **Backend (GraphQL + GraphiQL console):** _PENDING_BACKEND_URL_/graphql
+- **Frontend:** https://frontend-lemon-two-84.vercel.app
+- **Backend (GraphQL + GraphiQL console):** https://pokeapi-production-ecf5.up.railway.app/graphql
 
 ## Features
 
@@ -189,3 +189,14 @@ The frontend was tested manually and with an automated browser covering every fl
 - Periodically refreshing the index to include new Pokémon.
 - Reordering team members and keeping view state in the URL.
 - Rate limiting on our own API.
+
+
+## Deployment
+
+- **Frontend:** Vercel, served as a static site from `frontend/`.
+- **Backend:** Railway, built from `backend/` and started with
+  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+  A persistent volume is mounted at `/data` (`DB_PATH=/data/pokedopamina.db`), so the SQLite
+  database survives restarts and redeploys. `CORS_ORIGINS` only allows the Vercel URL.
+- **Why not everything on Vercel:** its functions have a read-only, ephemeral filesystem, so SQLite
+  data would be lost. Railway provides an always-on container with a real disk.
