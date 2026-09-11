@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Poké Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="dex-bar">
+    <div class="dex-brand">
+      <span class="dex-lens" aria-hidden="true"></span>
+      <span class="dex-leds" aria-hidden="true"><i></i><i></i><i></i></span>
+      <h1>Poké Explorer</h1>
+    </div>
+    <nav class="tabs" aria-label="Secciones">
+      <button type="button" class="tab" data-view="explore" aria-current="page">Explorar</button>
+      <button type="button" class="tab" data-view="bag">Mis Pokémon</button>
+      <button type="button" class="tab" data-view="teams">Equipos</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- EXPLORAR: el mercado -->
+    <section id="view-explore" class="view" aria-labelledby="explore-title">
+      <h2 id="explore-title" class="view-title">Explorar</h2>
+      <form id="search-form" class="search" role="search">
+        <label for="search-input" class="sr-only">Buscar Pokémon por nombre</label>
+        <input id="search-input" type="search" placeholder="Ej. charmander" autocomplete="off">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+      </form>
+      <p id="explore-status" class="status" role="status"></p>
+      <ul id="results" class="grid"></ul>
+      <button type="button" id="load-more" class="btn btn-ghost load-more" hidden>Cargar más</button>
+    </section>
+
+    <!-- MIS POKÉMON: la bolsa -->
+    <section id="view-bag" class="view" aria-labelledby="bag-title" hidden>
+      <h2 id="bag-title" class="view-title">Mis Pokémon</h2>
+      <div class="bag-layout">
+        <div>
+          <form id="bag-search-form" class="search" role="search">
+            <label for="bag-search-input" class="sr-only">Buscar en tu bolsa</label>
+            <input id="bag-search-input" type="search" placeholder="Busca en tu bolsa" autocomplete="off">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+          </form>
+          <p id="bag-status" class="status" role="status"></p>
+          <ul id="bag-list" class="grid"></ul>
+        </div>
+
+        <form id="custom-form" class="panel custom-form" novalidate>
+          <h3>Crear Pokémon</h3>
+          <label>Nombre
+            <input name="name" maxlength="30" placeholder="Si lo dejas vacío: PokePersonalizado N">
+          </label>
+          <div class="row">
+            <label>Tipo principal
+              <select name="type1" required class="type-select"></select>
+            </label>
+            <label>Segundo tipo
+              <select name="type2" class="type-select" data-optional></select>
+            </label>
+          </div>
+          <fieldset class="stats-inputs">
+            <legend>Estadísticas (1 a 150)</legend>
+            <label>PS <input name="hp" type="number" min="1" max="150" required></label>
+            <label>Ataque <input name="attack" type="number" min="1" max="150" required></label>
+            <label>Defensa <input name="defense" type="number" min="1" max="150" required></label>
+            <label>At. especial <input name="specialAttack" type="number" min="1" max="150" required></label>
+            <label>Def. especial <input name="specialDefense" type="number" min="1" max="150" required></label>
+            <label>Velocidad <input name="speed" type="number" min="1" max="150" required></label>
+          </fieldset>
+          <div class="row">
+            <label>Altura (m) <input name="height" type="number" min="0.1" step="0.1" required></label>
+            <label>Peso (kg) <input name="weight" type="number" min="0.1" step="0.1" required></label>
+          </div>
+          <p class="form-error" role="alert"></p>
+          <button type="submit" class="btn btn-primary">Crear Pokémon</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- EQUIPOS -->
+    <section id="view-teams" class="view" aria-labelledby="teams-title" hidden>
+      <h2 id="teams-title" class="view-title">Equipos</h2>
+      <p id="teams-status" class="status" role="status"></p>
+      <div id="teams-list" class="teams"></div>
+    </section>
+  </main>
+
+  <!-- DETALLE (mercado y bolsa) -->
+  <dialog id="detail-dialog" class="dialog detail" aria-labelledby="detail-name">
+    <button type="button" class="dialog-close" data-close aria-label="Cerrar">×</button>
+    <div class="detail-media"><div id="detail-sprite" class="sprite"></div></div>
+    <div class="detail-body">
+      <p id="detail-id" class="dex-id"></p>
+      <h2 id="detail-name" class="detail-name"></h2>
+      <div id="detail-types" class="types"></div>
+      <dl class="facts">
+        <div><dt>Altura</dt><dd id="detail-height"></dd></div>
+        <div><dt>Peso</dt><dd id="detail-weight"></dd></div>
+        <div id="detail-abilities-row"><dt>Habilidades</dt><dd id="detail-abilities" class="abilities"></dd></div>
+      </dl>
+      <ul id="detail-stats" class="stats"></ul>
+      <div id="detail-actions" class="detail-actions"></div>
+    </div>
+  </dialog>
+
+  <!-- EDITAR PERSONALIZADO -->
+  <dialog id="edit-dialog" class="dialog" aria-labelledby="edit-title">
+    <form id="edit-form" class="edit-form" novalidate>
+      <h2 id="edit-title">Editar Pokémon</h2>
+      <label>Nombre <input name="name" maxlength="30" required></label>
+      <div class="row">
+        <label>Altura (m) <input name="height" type="number" min="0.1" step="0.1" required></label>
+        <label>Peso (kg) <input name="weight" type="number" min="0.1" step="0.1" required></label>
+      </div>
+      <p class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- RENOMBRAR EQUIPO -->
+  <dialog id="rename-dialog" class="dialog" aria-labelledby="rename-title">
+    <form id="rename-form" class="edit-form" novalidate>
+      <h2 id="rename-title">Renombrar equipo</h2>
+      <label>Nombre <input name="name" maxlength="30" required></label>
+      <p class="form-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- CONFIRMAR -->
+  <dialog id="confirm-dialog" class="dialog confirm">
+    <form method="dialog">
+      <p id="confirm-message"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn btn-ghost">Cancelar</button>
+        <button value="ok" id="confirm-ok" class="btn btn-danger">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- PLANTILLAS (las clona app.js) -->
+  <template id="tpl-market-card">
+    <li>
+      <button type="button" class="card">
+        <span class="sprite"></span>
+        <span class="dex-id"></span>
+        <span class="card-name"></span>
+        <span class="types"></span>
+        <span class="tag tag-owned" hidden>En tu bolsa</span>
+      </button>
+    </li>
+  </template>
+
+  <template id="tpl-bag-card">
+    <li>
+      <button type="button" class="card">
+        <span class="sprite"></span>
+        <span class="card-name"></span>
+        <span class="types"></span>
+        <span class="card-meta">
+          <span class="hp"></span>
+          <span class="tag tag-custom" hidden>Personalizado</span>
+        </span>
+      </button>
+    </li>
+  </template>
+
+  <template id="tpl-team">
+    <details class="team" name="teams">
+      <summary class="team-summary">
+        <span class="team-bar">
+          <span class="team-name"></span>
+          <span class="team-count"></span>
+          <span class="team-chevron" aria-hidden="true">▾</span>
+        </span>
+        <span class="team-preview">
+          <span class="sprite team-cover"></span>
+          <span class="team-rows"></span>
+        </span>
+        <span class="team-empty">Inactivo: este equipo no tiene Pokémon.</span>
+      </summary>
+      <div class="team-body">
+        <ol class="members"></ol>
+        <div class="team-tools">
+          <div class="swatches" role="group" aria-label="Color del equipo"></div>
+          <div class="team-actions">
+            <button type="button" class="btn btn-ghost btn-small" data-action="rename">Renombrar</button>
+            <button type="button" class="btn btn-ghost btn-small" data-action="disband">Desintegrar</button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </template>
+
+  <template id="tpl-team-row">
+    <span class="team-row">
+      <span class="row-name"></span>
+      <span class="types"></span>
+      <span class="row-hp"></span>
+    </span>
+  </template>
+
+  <template id="tpl-member">
+    <li class="member">
+      <span class="sprite member-sprite"></span>
+      <div class="member-info">
+        <p class="member-name"></p>
+        <span class="types"></span>
+        <dl class="member-stats"></dl>
+      </div>
+      <button type="button" class="btn btn-ghost btn-small" data-action="remove">Quitar</button>
+    </li>
+  </template>
+
+  <template id="tpl-stat">
+    <li class="stat">
+      <span class="stat-name"></span>
+      <span class="stat-value"></span>
+      <span class="stat-bar"><span></span></span>
+    </li>
+  </template>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
